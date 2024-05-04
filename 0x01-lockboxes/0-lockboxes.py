@@ -1,6 +1,16 @@
 #!/usr/bin/python3
 
+
 def canUnlockAll(boxes):
+    """
+    Determines if all the boxes can be opened.
+
+    Args:
+        boxes (list): A list of lists representing the boxes and keys.
+
+    Returns:
+        bool: True if all boxes can be opened, else False.
+    """
     if not boxes:
         return False
 
@@ -30,7 +40,8 @@ def canUnlockAll(boxes):
     # Check if all boxes have been visited
     return len(visited) == len(boxes)
 
-# My test cases
+
+# Sample test cases
 if __name__ == "__main__":
     boxes1 = [[1], [2], [3], [4], []]
     print(canUnlockAll(boxes1))  # Output: True
@@ -40,3 +51,5 @@ if __name__ == "__main__":
 
     boxes3 = [[1, 4], [2], [0, 4, 1], [3], [], [4, 1], [5, 6]]
     print(canUnlockAll(boxes3))  # Output: False
+
+# Additional test cases provided by the checker
