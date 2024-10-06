@@ -7,7 +7,7 @@ to achieve exactly n H characters in a text file.
 
 def minOperations(n):
     """
-    Calculate the fewest number of operations needed to result in exactly n H characters.
+    Calc fewest no of operations needed to result in exactly n H chars.
 
     Parameters:
     n (int): The target number of characters.
