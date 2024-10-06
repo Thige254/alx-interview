@@ -1,60 +1,62 @@
 #!/usr/bin/python3
 import sys
-import signal
 import re
+import signal
 
-# Global variables to track total file size and status codes counts
-file_size = 0
-status_codes = {200: 0, 301: 0, 400: 0, 401: 0, 403: 0, 404: 0, 405: 0, 500: 0}
+# Initialize metrics
+total_file_size = 0
+status_codes = {
+    '200': 0,
+    '301': 0,
+    '400': 0,
+    '401': 0,
+    '403': 0,
+    '404': 0,
+    '405': 0,
+    '500': 0
+}
 line_count = 0
 
-def print_stats():
-    """ Prints the total file size and counts of status codes """
-    print(f"File size: {file_size}")
-    for code in sorted(status_codes.keys()):
+def signal_handler(sig, frame):
+    """Handles keyboard interrupt (CTRL + C) to print final statistics."""
+    print_statistics()
+    sys.exit(0)
+
+def print_statistics():
+    """Prints the accumulated statistics."""
+    print(f"File size: {total_file_size}")
+    for code in sorted(status_codes):
         if status_codes[code] > 0:
             print(f"{code}: {status_codes[code]}")
 
-def signal_handler(sig, frame):
-    """ Signal handler for keyboard interruption (Ctrl + C) """
-    print_stats()
-    sys.exit(0)
+# Register signal handler for keyboard interruption
+signal.signal(signal.SIGINT, signal_handler)
 
-# Updated regular expression to match the required log format
-log_pattern = r'^\S+ - \[\d{1,2}/[a-zA-Z]{3}/\d{4} \d{2}:\d{2}:\d{2}\] "GET /projects/260 HTTP/1.1" (\d{3}) (\d+)$'
+# Regular expression pattern to validate log line format
+log_pattern = r'(\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}) - \[(.*?)\] "GET /projects/260 HTTP/1.1" (\d{3}) (\d+)'
 
-# Function to process each line
-def process_line(line):
-    global file_size, line_count  # Corrected placement of 'global'
+for line in sys.stdin:
+    line = line.rstrip()  # Remove trailing whitespace
     match = re.match(log_pattern, line)
+
     if match:
         # Extract status code and file size
-        status_code = int(match.group(1))
-        file_size += int(match.group(2))
-        
-        # Update the status code count if it's a valid one
+        status_code = match.group(3)
+        file_size = int(match.group(4))
+
+        # Update metrics
+        total_file_size += file_size
         if status_code in status_codes:
             status_codes[status_code] += 1
+        
+        line_count += 1
 
-    line_count += 1  # Increment line count here
+        # Print statistics every 10 lines
+        if line_count % 10 == 0:
+            print_statistics()
+    else:
+        # Skip lines that do not match the format
+        continue
 
-if __name__ == "__main__":
-    # Register the signal handler for SIGINT (Ctrl + C)
-    signal.signal(signal.SIGINT, signal_handler)
-    
-    try:
-        # Process input line by line
-        for line in sys.stdin:
-            process_line(line.strip())  # Process each line
-
-            # After every 10 lines, print the stats
-            if line_count % 10 == 0:
-                print_stats()
-                
-    except KeyboardInterrupt:
-        # Handle any keyboard interruptions cleanly
-        print_stats()
-        sys.exit(0)
-
-    # Print final stats when stdin is done (EOF)
-    print_stats()
+# Final print of statistics if input ends
+print_statistics()
