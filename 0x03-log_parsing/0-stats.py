@@ -17,10 +17,12 @@ status_codes = {
 }
 line_count = 0
 
+
 def signal_handler(sig, frame):
     """Handles keyboard interrupt (CTRL + C) to print final statistics."""
     print_statistics()
     sys.exit(0)
+
 
 def print_statistics():
     """Prints the accumulated statistics."""
@@ -28,6 +30,7 @@ def print_statistics():
     for code in sorted(status_codes):
         if status_codes[code] > 0:
             print(f"{code}: {status_codes[code]}")
+
 
 # Register signal handler for keyboard interruption
 signal.signal(signal.SIGINT, signal_handler)
@@ -55,7 +58,7 @@ for line in sys.stdin:
         if line_count % 10 == 0:
             print_statistics()
     else:
-        # Skip lines that do not match the format
+        # Handle lines that do not match the format
         continue
 
 # Final print of statistics if input ends
